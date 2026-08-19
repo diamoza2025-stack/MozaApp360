@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Tour d'Horizon — Portfolio 360°</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav>
+  <div class="brand">
+    <div class="brand-mark"></div>
+    <span class="brand-name">Tour d'Horizon</span>
+  </div>
+  <div class="nav-actions">
+    <div class="gh-status" id="ghStatus"><span class="gh-dot" id="ghDot"></span><span id="ghStatusTxt">GitHub non connecté</span></div>
+    <button class="icon-btn" id="openSettings" title="Paramètres GitHub">⚙</button>
+    <button class="btn btn-solid" id="openAdd">+ Ajouter un travail</button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div>
+    <span class="eyebrow">Portfolio de visites virtuelles</span>
+    <h1>Chaque projet,<br><em>vu à 360°.</em></h1>
+    <p>Une collection de panoramas immersifs — glissez à l'intérieur de chaque image pour explorer l'espace comme si vous y étiez. Hébergé et stocké directement sur GitHub.</p>
+    <div class="hero-actions">
+      <button class="btn btn-solid" id="openAddHero">+ Ajouter un travail</button>
+      <a href="#gallery" class="btn">Voir la collection ↓</a>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="porthole-ring"></div>
+    <div class="hero-sphere"></div>
+    <div class="hero-cap mono">CAP 000°</div>
+  </div>
+</section>
+
+<div class="gallery-wrap" id="gallery">
+  <div class="gallery-head">
+    <h2>La collection</h2>
+    <span class="gallery-count mono" id="count">chargement…</span>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<footer>
+  <span class="mono">TOUR D'HORIZON</span>
+  <span>Glissez chaque vue pour explorer · Molette pour zoomer</span>
+</footer>
+
+<!-- SETTINGS MODAL -->
+<div class="overlay" id="overlaySettings">
+  <div class="modal">
+    <h3>Connexion GitHub</h3>
+    <div class="sub">Renseignez votre dépôt pour publier vos travaux directement dans GitHub. Le jeton n'est enregistré que dans ce navigateur.</div>
+    <form id="formSettings">
+      <div class="field">
+        <label>Propriétaire / dépôt</label>
+        <input type="text" id="gOwnerRepo" placeholder="ex. mon-compte/mon-portfolio-360" required>
+      </div>
+      <div class="field">
+        <label>Branche</label>
+        <input type="text" id="gBranch" placeholder="main" value="main">
+      </div>
+      <div class="field">
+        <label>Jeton d'accès personnel (fine-grained)</label>
+        <input type="password" id="gToken" placeholder="github_pat_..." required>
+        <div class="small">Créez-le sur GitHub → Settings → Developer settings → Fine-grained tokens. Limitez-le à ce dépôt, permission « Contents: Read and write ». Voir le README fourni pour le détail des étapes.</div>
+      </div>
+      <div class="hint-err" id="gErr"></div>
+      <div class="hint-ok" id="gOk"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn" id="gDisconnect">Déconnecter</button>
+        <button type="submit" class="btn btn-solid" id="gSave">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ADD WORK MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3>Nouveau travail</h3>
+    <div class="sub">Publiez une image panorama équirectangulaire (format 2:1 recommandé).</div>
+    <form id="form">
+      <div class="field">
+        <label>Titre du projet</label>
+        <input type="text" id="fTitle" placeholder="Ex. Villa des Almadies" required>
+      </div>
+      <div class="field">
+        <label>Lieu</label>
+        <input type="text" id="fPlace" placeholder="Ex. Dakar, Sénégal">
+      </div>
+      <div class="field">
+        <label>Catégorie</label>
+        <select id="fTag">
+          <option>Architecture</option>
+          <option>Intérieur</option>
+          <option>Extérieur</option>
+          <option>Événement</option>
+          <option>Autre</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Image 360° (panorama)</label>
+        <div class="drop" id="drop">
+          <input type="file" id="fFile" accept="image/*" required>
+          <div class="drop-txt" id="dropTxt"><strong>Cliquez</strong> ou déposez une image ici</div>
+        </div>
+        <div class="hint-err" id="fileErr"></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn" id="cancelAdd">Annuler</button>
+        <button type="submit" class="btn btn-solid" id="submitAdd" disabled>Publier</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- VIEWER -->
+<div class="viewer" id="viewer">
+  <div class="viewer-loading" id="viewerLoading">
+    <div class="spinner"></div>
+    <span>CHARGEMENT DE LA VUE…</span>
+  </div>
+  <canvas id="canvas"></canvas>
+  <div class="viewer-top">
+    <div class="viewer-title">
+      <span class="eyebrow" id="vTag">—</span>
+      <h4 id="vTitle">—</h4>
+    </div>
+    <button class="viewer-close" id="closeViewer">✕</button>
+  </div>
+  <div class="viewer-hint mono" id="vHint">GLISSEZ POUR EXPLORER · MOLETTE POUR ZOOMER</div>
+  <div class="viewer-heading">
+    <span class="eyebrow">Cap</span>
+    <div class="deg" id="vDeg">000°</div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
